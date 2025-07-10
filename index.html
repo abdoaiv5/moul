@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مول الكمبيوتر | إدارة المنتجات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🖥️ مول الكمبيوتر</h1>
+      <p>إدارة حديثة لمنتجاتك من أي جهاز</p>
+    </header>
+
+    <section id="loginSection">
+      <input type="password" id="adminPassword" placeholder="🔒 كلمة السر">
+      <button onclick="login()">دخول</button>
+    </section>
+
+    <section id="adminPanel" style="display:none;">
+      <h2>➕ إضافة منتج</h2>
+      <input type="text" id="productName" placeholder="اسم المنتج">
+      <input type="number" id="productPrice" placeholder="السعر بالجنيه">
+      <input type="file" id="productImage" accept="image/*">
+      <button onclick="addProduct()">إضافة المنتج</button>
+    </section>
+
+    <section class="searchBar">
+      <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..." oninput="renderProducts()">
+    </section>
+
+    <section id="productList"></section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
