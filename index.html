@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نظام الفواتير والمنتجات</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <section id="loginSection">
+    <h2>تسجيل الدخول</h2>
+    <input type="text" id="username" placeholder="اسم المستخدم" />
+    <input type="password" id="password" placeholder="كلمة المرور" />
+    <button onclick="login()">دخول</button>
+  </section>
+
+  <div id="dashboard" style="display:none;">
+    <nav>
+      <button onclick="showSection('productSection')">المنتجات</button>
+      <button onclick="showSection('invoiceSection')">الفاتورة</button>
+      <button onclick="toggleDarkMode()">الوضع الليلي</button>
+      <select onchange="setLanguage(this.value)">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+      </select>
+      <button onclick="startVoiceAssistant()">🎤 مساعد صوتي</button>
+    </nav>
+
+    <main>
+      <section id="productSection" class="content-section">
+        <h2>إدارة المنتجات</h2>
+        <div id="productForm" class="form">
+          <input type="text" id="productName" placeholder="اسم المنتج" />
+          <input type="number" id="productPrice" placeholder="السعر" />
+          <input type="text" id="productCode" placeholder="كود المنتج" />
+          <textarea id="productDescription" placeholder="الوصف"></textarea>
+          <input type="file" id="productImage" />
+          <button onclick="saveProduct()">💾 حفظ</button>
+        </div>
+        <input type="text" id="searchProduct" placeholder="🔍 بحث" onkeyup="searchProducts()" />
+        <div id="productList" class="list"></div>
+      </section>
+
+      <section id="invoiceSection" class="content-section" style="display:none;">
+        <h2>إدارة الفواتير</h2>
+        <input type="text" id="invoiceProductCode" placeholder="كود المنتج لإضافته" />
+        <button onclick="addToInvoice()">➕ إضافة للفاتورة</button>
+        <div id="invoiceItems" class="list"></div>
+        <p id="invoiceTotal">الإجمالي: 0 جنيه</p>
+        <button onclick="calculateInvoice()">🧮 احسب الإجمالي</button>
+        <button onclick="exportInvoice('excel')">📥 تصدير Excel</button>
+        <button onclick="exportInvoice('pdf')">📄 تصدير PDF</button>
+      </section>
+    </main>
+  </div>
+
+  <div id="alerts"></div>
+  <script src="script.js"></script>
+</body>
+</html>
