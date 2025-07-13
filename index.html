@@ -25,6 +25,7 @@
         <option value="fr">Français</option>
       </select>
       <button onclick="startVoiceAssistant()">🎤 مساعد صوتي</button>
+      <button onclick="logout()">🚪 خروج</button>
     </nav>
 
     <main>
@@ -34,9 +35,10 @@
           <input type="text" id="productName" placeholder="اسم المنتج" />
           <input type="number" id="productPrice" placeholder="السعر" />
           <input type="text" id="productCode" placeholder="كود المنتج" />
+          <input type="number" id="productStock" placeholder="الكمية بالمخزون" />
           <textarea id="productDescription" placeholder="الوصف"></textarea>
           <input type="file" id="productImage" />
-          <button onclick="saveProduct()">💾 حفظ</button>
+          <button id="saveBtn" onclick="saveProduct()">💾 حفظ</button>
         </div>
         <input type="text" id="searchProduct" placeholder="🔍 بحث" onkeyup="searchProducts()" />
         <div id="productList" class="list"></div>
@@ -44,13 +46,16 @@
 
       <section id="invoiceSection" class="content-section" style="display:none;">
         <h2>إدارة الفواتير</h2>
+        <input type="text" id="customerName" placeholder="اسم الزبون" />
         <input type="text" id="invoiceProductCode" placeholder="كود المنتج لإضافته" />
+        <input type="number" id="invoiceQuantity" placeholder="الكمية" />
         <button onclick="addToInvoice()">➕ إضافة للفاتورة</button>
         <div id="invoiceItems" class="list"></div>
         <p id="invoiceTotal">الإجمالي: 0 جنيه</p>
         <button onclick="calculateInvoice()">🧮 احسب الإجمالي</button>
         <button onclick="exportInvoice('excel')">📥 تصدير Excel</button>
         <button onclick="exportInvoice('pdf')">📄 تصدير PDF</button>
+        <button onclick="printInvoice()">🖨️ طباعة الفاتورة</button>
       </section>
     </main>
   </div>

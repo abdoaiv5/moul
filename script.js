@@ -1,194 +1,216 @@
-// 🔒 ثابت التخزين المحلي
-const STORAGE_KEY = "products";
-
-// 📦 تحميل المنتجات
-let products = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let invoice = [];
-
-// ✅ تسجيل الدخول
+// ------------------ تسجيل الدخول ------------------
 function login() {
-  const u = document.getElementById("username").value;
-  const p = document.getElementById("password").value;
-
-  if (u === "admin" && p === "1234") {
-    toggleView("loginSection", false);
-    toggleView("dashboard", true);
-    renderProducts();
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  if (username === "admin" && password === "123") {
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    loadProducts();
   } else {
-    alert("بيانات الدخول غير صحيحة");
+    showAlert("بيانات الدخول غير صحيحة");
   }
 }
 
-// 📂 عرض قسم معين
-function showSection(id) {
-  document.querySelectorAll(".content-section").forEach(el => el.style.display = "none");
-  toggleView(id, true);
+function logout() {
+  document.getElementById("loginSection").style.display = "block";
+  document.getElementById("dashboard").style.display = "none";
 }
 
-function toggleView(id, show) {
-  document.getElementById(id).style.display = show ? "block" : "none";
-}
-
-// 💾 حفظ منتج جديد
-function saveProduct() {
-  const name = document.getElementById("productName").value.trim();
-  const price = parseFloat(document.getElementById("productPrice").value);
-  const code = document.getElementById("productCode").value.trim();
-  const desc = document.getElementById("productDescription").value.trim();
-  const imgInput = document.getElementById("productImage").files[0];
-
-  if (!name || isNaN(price) || !code) {
-    alert("الرجاء ملء الحقول المطلوبة بشكل صحيح.");
-    return;
-  }
-
-  const saveAndRender = (img = "") => {
-    products.push({ name, price, code, desc, img });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    renderProducts();
-  };
-
-  if (imgInput) {
-    const reader = new FileReader();
-    reader.onload = () => saveAndRender(reader.result);
-    reader.readAsDataURL(imgInput);
-  } else {
-    saveAndRender();
-  }
-}
-
-// 🧾 عرض المنتجات
-function renderProducts(list = products) {
-  const container = document.getElementById("productList");
-  container.innerHTML = "";
-
-  list.forEach((p, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <h4>${p.name}</h4>
-      <p>${p.desc}</p>
-      <p><b>${p.price}</b> جنيه</p>
-      ${p.img ? `<img src="${p.img}" width="100" alt="صورة المنتج" />` : ""}
-      <button onclick="deleteProduct(${i})">🗑 حذف</button>
-    `;
-
-    container.appendChild(card);
-  });
-}
-
-// 🗑 حذف منتج
-function deleteProduct(index) {
-  products.splice(index, 1);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-  renderProducts();
-}
-
-// 🔍 بحث
-function searchProducts() {
-  const term = document.getElementById("searchProduct").value.trim().toLowerCase();
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(term) || p.code.toLowerCase().includes(term)
-  );
-  renderProducts(filtered);
-}
-
-// ➕ إضافة للفاتورة
-function addToInvoice() {
-  const code = document.getElementById("invoiceProductCode").value.trim();
-  const product = products.find(p => p.code === code);
-
-  if (product) {
-    invoice.push(product);
-    renderInvoice();
-  } else {
-    alert("لم يتم العثور على المنتج.");
-  }
-}
-
-// 💳 عرض الفاتورة
-function renderInvoice() {
-  const container = document.getElementById("invoiceItems");
-  container.innerHTML = "";
-
-  invoice.forEach((p, i) => {
-    const item = document.createElement("div");
-    item.className = "invoice-item";
-    item.innerHTML = `
-      <p>${p.name} - ${p.price} جنيه</p>
-      <button onclick="removeInvoiceItem(${i})">🗑</button>
-    `;
-    container.appendChild(item);
-  });
-}
-
-// ❌ حذف منتج من الفاتورة
-function removeInvoiceItem(index) {
-  invoice.splice(index, 1);
-  renderInvoice();
-}
-
-// 💰 حساب الفاتورة
-function calculateInvoice() {
-  const total = invoice.reduce((sum, item) => sum + item.price, 0);
-  const tax = total * 0.14;
-  const grand = total + tax;
-
-  document.getElementById("invoiceTotal").innerText =
-    `الإجمالي: ${grand.toFixed(2)} جنيه (شامل الضريبة)`;
-}
-
-// 📤 تصدير الفاتورة
-function exportInvoice(type) {
-  let content = "اسم المنتج,السعر\n";
-  invoice.forEach(p => content += `${p.name},${p.price}\n`);
-
-  const mimeType = type === "pdf" ? "application/pdf" : "text/csv";
-  const filename = `invoice.${type}`;
-
-  const blob = new Blob([content], { type: mimeType });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
-}
-
-// 🌙 تفعيل الوضع الداكن
+// ------------------ الوضع الليلي ------------------
 function toggleDarkMode() {
   document.body.classList.toggle("dark");
 }
 
-// 🗣️ مساعد صوتي
+// ------------------ التنقل بين الأقسام ------------------
+function showSection(id) {
+  document.querySelectorAll(".content-section").forEach(section => {
+    section.style.display = "none";
+  });
+  document.getElementById(id).style.display = "block";
+}
+
+// ------------------ المنتجات ------------------
+let products = JSON.parse(localStorage.getItem("products") || "[]");
+
+function saveProduct() {
+  const name = document.getElementById("productName").value;
+  const price = parseFloat(document.getElementById("productPrice").value);
+  const code = document.getElementById("productCode").value;
+  const stock = parseInt(document.getElementById("productStock").value);
+  const description = document.getElementById("productDescription").value;
+  const imageInput = document.getElementById("productImage");
+  let image = "";
+
+  if (!name || !price || !code || !stock) {
+    showAlert("الرجاء ملء جميع الحقول الأساسية");
+    return;
+  }
+
+  if (imageInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      image = reader.result;
+      addProduct({ name, price, code, stock, description, image });
+    };
+    reader.readAsDataURL(imageInput.files[0]);
+  } else {
+    addProduct({ name, price, code, stock, description, image });
+  }
+}
+
+function addProduct(product) {
+  const existing = products.find(p => p.code === product.code);
+  if (existing) {
+    Object.assign(existing, product);
+  } else {
+    products.push(product);
+  }
+  localStorage.setItem("products", JSON.stringify(products));
+  loadProducts();
+  clearProductForm();
+  showAlert("تم حفظ المنتج بنجاح");
+}
+
+function clearProductForm() {
+  document.getElementById("productName").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productCode").value = "";
+  document.getElementById("productStock").value = "";
+  document.getElementById("productDescription").value = "";
+  document.getElementById("productImage").value = "";
+}
+
+function loadProducts(filtered = null) {
+  const list = document.getElementById("productList");
+  list.innerHTML = "";
+  const displayProducts = filtered || products;
+
+  displayProducts.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h3>${p.name}</h3>
+      <p>السعر: ${p.price} جنيه</p>
+      <p>الكود: ${p.code}</p>
+      <p>الكمية: ${p.stock}</p>
+      <p>${p.description}</p>
+      ${p.image ? `<img src="${p.image}" alt="${p.name}" />` : ""}
+      <button onclick="editProduct('${p.code}')">تعديل</button>
+      <button onclick="deleteProduct('${p.code}')">🗑 حذف</button>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function editProduct(code) {
+  const p = products.find(p => p.code === code);
+  if (!p) return;
+  document.getElementById("productName").value = p.name;
+  document.getElementById("productPrice").value = p.price;
+  document.getElementById("productCode").value = p.code;
+  document.getElementById("productStock").value = p.stock;
+  document.getElementById("productDescription").value = p.description;
+  document.getElementById("saveBtn").textContent = "تحديث المنتج";
+}
+
+function deleteProduct(code) {
+  if (!confirm("هل أنت متأكد من حذف المنتج؟")) return;
+  products = products.filter(p => p.code !== code);
+  localStorage.setItem("products", JSON.stringify(products));
+  loadProducts();
+  showAlert("تم حذف المنتج");
+}
+
+function searchProducts() {
+  const term = document.getElementById("searchProduct").value.toLowerCase();
+  const result = products.filter(p => p.name.toLowerCase().includes(term) || p.code.includes(term));
+  loadProducts(result);
+}
+
+// ------------------ الفاتورة ------------------
+let invoice = [];
+
+function addToInvoice() {
+  const code = document.getElementById("invoiceProductCode").value;
+  const quantity = parseInt(document.getElementById("invoiceQuantity").value);
+
+  const product = products.find(p => p.code === code);
+  if (!product) {
+    showAlert("لم يتم العثور على المنتج");
+    return;
+  }
+
+  if (product.stock < quantity) {
+    showAlert("الكمية المطلوبة غير متوفرة");
+    return;
+  }
+
+  invoice.push({ ...product, quantity });
+  product.stock -= quantity;
+  localStorage.setItem("products", JSON.stringify(products));
+  loadProducts();
+  renderInvoice();
+}
+
+function renderInvoice() {
+  const container = document.getElementById("invoiceItems");
+  container.innerHTML = "";
+  invoice.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "invoice-item";
+    div.innerHTML = `
+      <h4>${item.name}</h4>
+      <p>الكمية: ${item.quantity}</p>
+      <p>السعر الإجمالي: ${item.price * item.quantity} جنيه</p>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function calculateInvoice() {
+  const total = invoice.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  document.getElementById("invoiceTotal").textContent = `الإجمالي: ${total} جنيه`;
+}
+
+function printInvoice() {
+  const win = window.open();
+  win.document.write("<h1>الفاتورة</h1>");
+  invoice.forEach(i => {
+    win.document.write(`<p>${i.name} - الكمية: ${i.quantity} - السعر: ${i.price * i.quantity} جنيه</p>`);
+  });
+  win.document.write(`<h3>${document.getElementById("invoiceTotal").textContent}</h3>`);
+  win.print();
+  win.close();
+}
+
+function exportInvoice(type) {
+  let content = "اسم المنتج\tالكمية\tالسعر الكلي\n";
+  invoice.forEach(i => {
+    content += `${i.name}\t${i.quantity}\t${i.price * i.quantity}\n`;
+  });
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `invoice.${type === "excel" ? "xls" : "txt"}`;
+  link.click();
+}
+
+// ------------------ مساعد صوتي (تمثيلي) ------------------
 function startVoiceAssistant() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) return alert("متصفحك لا يدعم التعرف على الصوت.");
-
-  const recog = new SpeechRecognition();
-  recog.lang = "ar-SA";
-
-  recog.onstart = () => setAlert("🎙️ جاري الاستماع...");
-  recog.onerror = e => setAlert("", true) || alert(`خطأ: ${e.error}`);
-  recog.onend = () => setAlert("");
-  recog.onresult = e => handleVoiceCommand(e.results[0][0].transcript);
-
-  recog.start();
+  showAlert("📢 المساعد الصوتي قيد التطوير.");
 }
 
-function handleVoiceCommand(cmd) {
-  const command = cmd.trim().toLowerCase();
-  if (command.includes("أضف منتج")) showSection('productSection');
-  else if (command.includes("فتح الفاتورة")) showSection('invoiceSection');
-  else if (command.includes("احسب") || command.includes("إجمالي")) calculateInvoice();
-  else alert("🚫 لم أفهم الأمر الصوتي.");
+// ------------------ التنبيهات ------------------
+function showAlert(msg) {
+  const alerts = document.getElementById("alerts");
+  alerts.textContent = msg;
+  alerts.style.display = "block";
+  setTimeout(() => {
+    alerts.style.display = "none";
+  }, 3000);
 }
 
-function setAlert(message, hide = false) {
-  const alertEl = document.getElementById("alerts");
-  alertEl.innerText = message;
-  alertEl.style.display = hide || !message ? "none" : "block";
-}
-
+// ------------------ تغيير اللغة ------------------
 function setLanguage(lang) {
-  alert(`تم تغيير اللغة إلى: ${lang} (الترجمة غير مفعلة بعد)`);
+  showAlert(`تم تغيير اللغة إلى: ${lang}`);
 }
