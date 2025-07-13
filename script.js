@@ -6,19 +6,22 @@ function login() {
     document.getElementById("loginSection").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
     loadProducts();
+    showAlert("تم تسجيل الدخول بنجاح", "success");
   } else {
-    showAlert("بيانات الدخول غير صحيحة");
+    showAlert("❌ بيانات الدخول غير صحيحة", "error");
   }
 }
 
 function logout() {
   document.getElementById("loginSection").style.display = "block";
   document.getElementById("dashboard").style.display = "none";
+  showAlert("تم تسجيل الخروج", "info");
 }
 
 // ------------------ الوضع الليلي ------------------
 function toggleDarkMode() {
   document.body.classList.toggle("dark");
+  showAlert("تم تغيير الوضع", "info");
 }
 
 // ------------------ التنقل بين الأقسام ------------------
@@ -42,7 +45,7 @@ function saveProduct() {
   let image = "";
 
   if (!name || !price || !code || !stock) {
-    showAlert("الرجاء ملء جميع الحقول الأساسية");
+    showAlert("⚠️ الرجاء ملء جميع الحقول الأساسية", "warning");
     return;
   }
 
@@ -62,13 +65,14 @@ function addProduct(product) {
   const existing = products.find(p => p.code === product.code);
   if (existing) {
     Object.assign(existing, product);
+    showAlert("✅ تم تحديث المنتج بنجاح", "success");
   } else {
     products.push(product);
+    showAlert("✅ تم إضافة المنتج بنجاح", "success");
   }
   localStorage.setItem("products", JSON.stringify(products));
   loadProducts();
   clearProductForm();
-  showAlert("تم حفظ المنتج بنجاح");
 }
 
 function clearProductForm() {
@@ -111,6 +115,7 @@ function editProduct(code) {
   document.getElementById("productStock").value = p.stock;
   document.getElementById("productDescription").value = p.description;
   document.getElementById("saveBtn").textContent = "تحديث المنتج";
+  showAlert("⚙️ تم تحميل بيانات المنتج للتعديل", "info");
 }
 
 function deleteProduct(code) {
@@ -118,7 +123,7 @@ function deleteProduct(code) {
   products = products.filter(p => p.code !== code);
   localStorage.setItem("products", JSON.stringify(products));
   loadProducts();
-  showAlert("تم حذف المنتج");
+  showAlert("🗑 تم حذف المنتج", "success");
 }
 
 function searchProducts() {
@@ -136,12 +141,12 @@ function addToInvoice() {
 
   const product = products.find(p => p.code === code);
   if (!product) {
-    showAlert("لم يتم العثور على المنتج");
+    showAlert("🚫 لم يتم العثور على المنتج", "error");
     return;
   }
 
   if (product.stock < quantity) {
-    showAlert("الكمية المطلوبة غير متوفرة");
+    showAlert("⚠️ الكمية المطلوبة غير متوفرة", "warning");
     return;
   }
 
@@ -150,6 +155,7 @@ function addToInvoice() {
   localStorage.setItem("products", JSON.stringify(products));
   loadProducts();
   renderInvoice();
+  showAlert("✅ تم إضافة المنتج إلى الفاتورة", "success");
 }
 
 function renderInvoice() {
@@ -195,22 +201,40 @@ function exportInvoice(type) {
   link.click();
 }
 
-// ------------------ مساعد صوتي (تمثيلي) ------------------
-function startVoiceAssistant() {
-  showAlert("📢 المساعد الصوتي قيد التطوير.");
+// ------------------ مساعد صوتي (محسّن) ------------------
+function speak(text) {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ar-EG';
+    utterance.pitch = 1;
+    utterance.rate = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.cancel(); // إلغاء أي نطق سابق
+    window.speechSynthesis.speak(utterance);
+  }
 }
 
-// ------------------ التنبيهات ------------------
-function showAlert(msg) {
-  const alerts = document.getElementById("alerts");
-  alerts.textContent = msg;
-  alerts.style.display = "block";
+function startVoiceAssistant() {
+  speak("أهلاً بك، المساعد الصوتي يعمل الآن.");
+  showAlert("🎤 المساعد الصوتي يعمل الآن", "info");
+}
+
+// ------------------ التنبيهات المحسّنة ------------------
+function showAlert(message, type = "info") {
+  const alertBox = document.getElementById("alerts");
+  alertBox.textContent = message;
+
+  alertBox.className = "alert " + type;
+  alertBox.style.display = "block";
+
+  speak(message); // تشغيل المساعد الصوتي تلقائياً
+
   setTimeout(() => {
-    alerts.style.display = "none";
-  }, 3000);
+    alertBox.style.display = "none";
+  }, 5000);
 }
 
 // ------------------ تغيير اللغة ------------------
 function setLanguage(lang) {
-  showAlert(`تم تغيير اللغة إلى: ${lang}`);
+  showAlert(`تم تغيير اللغة إلى: ${lang}`, "info");
 }
